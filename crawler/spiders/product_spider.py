@@ -29,10 +29,10 @@ class DrinkSpider(scrapy.Spider):
             product_title = drink.css('a.product-box_image').attrib['title']
             product_price = (drink.css('div.product-box_price-value.text-secondary::text').get()).replace(' ', '')
             r = requests.post(self.request_url, json={
-                "product_id": int(product_id),
-                "product_title": product_title,
-                "product_price": int(product_price.replace(',', '')),
-                "price_before_discount": int(product_price.replace(',', ''))
+                "id": int(product_id),
+                "title": product_title,
+                "price": int(product_price.replace(',', '')),
+                "base_price": int(product_price.replace(',', ''))
             })
         if DrinkSpider.num_of_pages >= DrinkSpider.counter:
             next_page = "https://okala.com/drinks-herbaltea?pageNumber=" + str(DrinkSpider.counter)

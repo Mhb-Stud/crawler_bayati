@@ -6,6 +6,7 @@ class TezolSpider(scrapy.Spider):
     name = 'tezol'
     start_urls = ['https://www.tezolmarket.com/Home/GetProductQueryResult']
     request_url = 'https://www.tezolmarket.com/Home/GetProductQueryResult'
+    endpoint_url = 'http://127.0.0.1:8000/'
 
     def parse(self, response, **kwargs):
         api_response = requests.post(self.request_url, json={
@@ -16,4 +17,14 @@ class TezolSpider(scrapy.Spider):
         "CategoryId": 46,
         "AppliedBrandIds": None
         })
-        print(api_response.json())
+        resp_in_json = api_response.json()
+        new_format = []
+        deserialized = resp_in_json.get("Products")
+        for product in deserialized:
+            temp_dic = {}
+            temp_dic['id'] = product['ProductId']
+            temp_dic['title'] = product['FullName']
+            temp_dic['price'] = int(product['FinalUnitPrice'])*10
+            temp_dic['base_price'] = int(product['FinalUnitPrice'])*10
+            new_format.append(temp_dic)
+        r = requests.post(self.endpoint_url, json=new_format)

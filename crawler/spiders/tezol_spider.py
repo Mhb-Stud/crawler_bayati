@@ -18,7 +18,6 @@ class TezolSpider(scrapy.Spider):
         "AppliedBrandIds": None
         })
         resp_in_json = api_response.json()
-        new_format = []
         deserialized = resp_in_json.get("Products")
         for product in deserialized:
             temp_dic = {}
@@ -26,5 +25,4 @@ class TezolSpider(scrapy.Spider):
             temp_dic['title'] = product['FullName']
             temp_dic['price'] = int(product['FinalUnitPrice'])*10
             temp_dic['base_price'] = int(product['FinalUnitPrice'])*10
-            new_format.append(temp_dic)
-        r = requests.post(self.endpoint_url, json=new_format)
+            r = requests.post(self.endpoint_url, json=temp_dic)

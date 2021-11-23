@@ -25,4 +25,5 @@ class TezolSpider(scrapy.Spider):
             temp_dic['title'] = product['FullName'].replace(' ', '-')
             temp_dic['price'] = int(product['FinalUnitPrice'])*10
             temp_dic['base_price'] = int(product['FinalUnitPrice'])*10
+            temp_dic['vendor'] = "tezol"
             r = requests.post(self.endpoint_url, json=temp_dic)

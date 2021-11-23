@@ -22,7 +22,7 @@ class TezolSpider(scrapy.Spider):
         for product in deserialized:
             temp_dic = {}
             temp_dic['id'] = product['ProductId']
-            temp_dic['title'] = product['FullName']
+            temp_dic['title'] = product['FullName'].replace(' ', '-')
             temp_dic['price'] = int(product['FinalUnitPrice'])*10
             temp_dic['base_price'] = int(product['FinalUnitPrice'])*10
             r = requests.post(self.endpoint_url, json=temp_dic)

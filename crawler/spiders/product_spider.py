@@ -30,7 +30,7 @@ class DrinkSpider(scrapy.Spider):
             product_price = (drink.css('div.product-box_price-value.text-secondary::text').get()).replace(' ', '')
             r = requests.post(self.request_url, json={
                 "id": int(product_id),
-                "title": product_title,
+                "title": product_title.replace(' ', '-'),
                 "price": int(product_price.replace(',', '')),
                 "base_price": int(product_price.replace(',', ''))
             })

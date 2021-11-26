@@ -12,7 +12,7 @@ class DrinkSpider(scrapy.Spider):
     # getting url for first page
     start_urls = ['https://okala.com/drinks-herbaltea']
     # address of our api app that we want to send data to
-    request_url = 'http://127.0.0.1:8000/'
+    request_url = 'http://127.0.0.1:8000/api'
 
     """ 
     crawls the website first finding products by their css tag then 

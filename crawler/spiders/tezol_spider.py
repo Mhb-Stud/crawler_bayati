@@ -6,7 +6,7 @@ class TezolSpider(scrapy.Spider):
     name = 'tezol'
     start_urls = ['https://www.tezolmarket.com/Home/GetProductQueryResult']
     request_url = 'https://www.tezolmarket.com/Home/GetProductQueryResult'
-    endpoint_url = 'http://127.0.0.1:8000/api'
+    endpoint_url = 'http://127.0.0.1:8000/api/'
 
     def parse(self, response, **kwargs):
         api_response = requests.post(self.request_url, json={

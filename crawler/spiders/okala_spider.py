@@ -2,7 +2,7 @@ import scrapy
 from scrapy import Request
 import json
 
-class DrinkSpider(scrapy.Spider):
+class OkalaSpider(scrapy.Spider):
 
     # name of our spider
     name = 'okala'

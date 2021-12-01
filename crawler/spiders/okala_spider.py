@@ -38,7 +38,7 @@ class OkalaSpider(scrapy.Spider):
                 "base_price": int(product_price.replace(',', '')),
                 "vendor": "okala"
             }), method='POST', headers={'Content-Type': 'application/json'})
-        if DrinkSpider.num_of_pages >= DrinkSpider.counter:
-            next_page = "https://okala.com/drinks-herbaltea?pageNumber=" + str(DrinkSpider.counter)
-            DrinkSpider.counter = DrinkSpider.counter + 1
+        if OkalaSpider.num_of_pages >= OkalaSpider.counter:
+            next_page = "https://okala.com/drinks-herbaltea?pageNumber=" + str(OkalaSpider.counter)
+            OkalaSpider.counter = OkalaSpider.counter + 1
             yield response.follow(next_page, callback=self.parse)

@@ -28,11 +28,11 @@ class TezolCategorySpider(scrapy.Spider):
                     yield self.data_sender(parent_category, sub_sub_category_name)
 
     def data_sender(self, super_category, name):
-        temp_dic = {
+        temp = {
             'name': name,
             'super_category': super_category
         }
-        return Request(self.endpoint_url, body=json.dumps(temp_dic), method='POST',
+        return Request(self.endpoint_url, body=json.dumps(temp), method='POST',
                        headers={'Content-Type': 'application/json'})
 
 
@@ -40,6 +40,7 @@ class TezolProductCrawler(scrapy.Spider):
     name = 'tezolProduct'
     endpoint_url = 'http://127.0.0.1:8000/api/'
     request_url = 'https://www.tezolmarket.com/Home/GetProductQueryResult'
+    product_details = 'https://www.tezolmarket.com/Product/product_id/slug?returnUrl=/Category/category_id/'
 
     def start_requests(self):
         yield Request(self.request_url, body=json.dumps({
@@ -51,19 +52,37 @@ class TezolProductCrawler(scrapy.Spider):
             "AppliedBrandIds": None
         }), method='POST', headers={'Content-Type': 'application/json'})
 
+    def product_website_api_request(self, page_number, category_id):
+        yield Request(self.request_url, body=json.dumps({
+            "AppliedAttributeValueIds": None,
+            "SearchTerm": None,
+            "SearchPrice": None,
+            "PageIndex": page_number,
+            "CategoryId": category_id,
+            "AppliedBrandIds": None
+        }), method='POST', headers={'Content-Type': 'application/json'})
+
     def parse(self, response, **kwargs):
-        pass
+        page_number = 0
+        for category_id in range(4):
+            while response is not None:
+                self.product_website_api_request(page_number, category_id)
+                self.product_slug_index_scraper(response)
+                page_number = page_number + 1
 
     def product_slug_index_scraper(self, response):
         response_in_json = json.loads(response.body)
         products = response_in_json.get("Products")
         for product in products:
-            temp_dic = {}
-            temp_dic['id'] = product['ProductId']
-            temp_dic['slug'] = product['FullName'].replace(' ', '-')
-            temp_dic['name'] = product['FullName']
-            temp_dic['price'] = int(product['FinalUnitPrice']) * 10
-            temp_dic['base_price'] = int(product['FinalUnitPrice']) * 10
-            temp_dic['vendor'] = "tezol"
-            yield Request(self.endpoint_url, body=json.dumps(temp_dic), method='POST',
-                          headers={'Content-Type': 'application/json'})
+            product_instance = {}
+            product_instance['id'] = product['ProductId']
+            product_instance['name'] = product['FullName']
+            product_instance['price'] = int(product['FinalUnitPrice']) * 10
+            product_instance['base_price'] = int(product['FinalUnitPrice']) * 10
+            product_instance['vendor'] = "tezol"
+            self.product_brand_scraper(product_instance, response)
+
+    def product_brand_scraper(self, product_instance, response):
+        product_instance['id']
+        product_instance['id']
+        yield Response(self.product_details)

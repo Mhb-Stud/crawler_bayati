@@ -41,6 +41,8 @@ class TezolProductCrawler(scrapy.Spider):
     endpoint_url = 'http://127.0.0.1:8000/api/'
     request_url = 'https://www.tezolmarket.com/Home/GetProductQueryResult'
     product_details = 'https://www.tezolmarket.com/Product/product_id/slug?returnUrl=/Category/category_id/'
+    page_number = 1
+    category_id = 1
 
     def start_requests(self):
         yield Request(self.request_url, body=json.dumps({
@@ -48,41 +50,46 @@ class TezolProductCrawler(scrapy.Spider):
             "SearchTerm": None,
             "SearchPrice": None,
             "PageIndex": 0,
-            "CategoryId": 46,
+            "CategoryId": 1,
             "AppliedBrandIds": None
         }), method='POST', headers={'Content-Type': 'application/json'})
 
-    def product_website_api_request(self, page_number, category_id):
-        yield Request(self.request_url, body=json.dumps({
-            "AppliedAttributeValueIds": None,
-            "SearchTerm": None,
-            "SearchPrice": None,
-            "PageIndex": page_number,
-            "CategoryId": category_id,
-            "AppliedBrandIds": None
-        }), method='POST', headers={'Content-Type': 'application/json'})
+    # def product_website_api_request(self, page_number, category_id):
+    #     return Request(self.request_url, body=json.dumps({
+    #         "AppliedAttributeValueIds": None,
+    #         "SearchTerm": None,
+    #         "SearchPrice": None,
+    #         "PageIndex": page_number,
+    #         "CategoryId": category_id,
+    #         "AppliedBrandIds": None
+    #     }), method='POST', headers={'Content-Type': 'application/json'})
+
+    def data_sender(self, product_instance):
+        return Request(self.endpoint_url, body=json.dumps(product_instance), method='POST',
+                       headers={'Content-Type': 'application/json'})
 
     def parse(self, response, **kwargs):
-        page_number = 0
-        for category_id in range(4):
-            while response is not None:
-                self.product_website_api_request(page_number, category_id)
-                self.product_slug_index_scraper(response)
-                page_number = page_number + 1
-
-    def product_slug_index_scraper(self, response):
         response_in_json = json.loads(response.body)
         products = response_in_json.get("Products")
         for product in products:
             product_instance = {}
             product_instance['id'] = product['ProductId']
             product_instance['name'] = product['FullName']
+            product_instance['slug'] = product['Slug']
+            product_instance['category_id'] = response_in_json.get("CategoryId")
             product_instance['price'] = int(product['FinalUnitPrice']) * 10
             product_instance['base_price'] = int(product['FinalUnitPrice']) * 10
             product_instance['vendor'] = "tezol"
-            self.product_brand_scraper(product_instance, response)
+            product_id = product_instance['id']
+            category_id = product_instance['category_id']
+            slug = product_instance['slug']
+            formatted_request = self.product_details.replace('category_id', str(category_id)).replace('product_id', str(product_id)).replace('slug', str(slug))
+            yield Request(formatted_request, callback=self.product_scraper, cb_kwargs=product_instance)
 
-    def product_brand_scraper(self, product_instance, response):
-        product_instance['id']
-        product_instance['id']
-        yield Response(self.product_details)
+    def product_scraper(self, response, **product_instance):
+        details = response.css('div.fullProductInfo.pull-sm-left.pull-xs-none').css('div.item')
+        for detail in details:
+            brand = detail.xpath('//span[@itemprop="brand"]/text()').get()
+            if brand is not None:
+                product_instance['brand'] = brand
+                yield self.data_sender(product_instance)

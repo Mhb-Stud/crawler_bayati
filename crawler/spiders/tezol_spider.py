@@ -66,6 +66,11 @@ class TezolProductCrawler(scrapy.Spider):
         }), method='POST', headers={'Content-Type': 'application/json'}, callback=self.product_scraper)
 
     def page_number_saver(self, category_id):
+        """the only reason i'm using requests library here is for each category i have to get the page number from
+        the api request to then loop through the pages sending an api request to each page and finally crawl their data
+        because scrapy.Request uses concurrency i can't use it since i need to have number of pages before i go through
+        with my code and only 119 times i have to run page_number_saver and it doesn't create a bottleneck
+        """
         api_response = requests.post(self.request_url, json={
             "AppliedAttributeValueIds": None,
             "SearchTerm": None,
